@@ -1,0 +1,25 @@
+Any text here is ignored.
+
+{
+    enableLED: 1,
+    enableMagneticSwitch: 1,
+    enableTimeSettingFromGPS: 1,
+    enableEdgeImpulseModel: 1,
+    batteryLevelDisplayType: 1,
+    recordingPeriods: [
+        {startTime: "01:00", stopTime: "02:00"},
+        {startTime: "03:00", stopTime: "04:00"},
+        {startTime: "16:00", stopTime: "17:00"},
+        {startTime: "18:00", stopTime: "19:00"},
+        {startTime: "20:00", stopTime: "24:00"}
+    ],
+    sleepRecordCycle: {
+        sleepDuration: 5,
+        recordDuration: 55
+    },
+    minimumTriggerDuration: 5,
+    firstRecordingDate: "01/06/2022",
+    lastRecordingDate: "01/07/2022"
+}
+
+Text here is also ignored.

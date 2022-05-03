@@ -1,0 +1,14 @@
+Any text here is ignored.
+
+{
+    enableLED: 1,
+    enableMagneticSwitch: 1,
+    enableTimeSettingFromGPS: 1,
+    enableEdgeImpulseModel: 1,
+    batteryLevelDisplayType: 1,
+    recordingPeriods: [
+        {startTime: "00:00", stopTime: "24:00"}
+    ]
+}
+
+Text here is also ignored.
