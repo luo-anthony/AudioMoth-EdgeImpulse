@@ -18,17 +18,9 @@
 
 /* EI Project includes and defines */
 #include "source/ei_main_loop.h"
-#define STARTUP_MESSAGE "Loop started\n"
 #define DETECTION_THRESHOLD 0.8f
 #define EI_SIGNAL_LENGTH 16000
 #define LOGS_FILE "logs.txt"
-
-// If true, only keep target sounds. If false, save everything to SD Card (but still classifying it)
-bool filterUnwantedSounds = true;
-
-/* Microphone warm-up constant */
-
-#define FRACTION_OF_SECOND_FOR_WARMUP 2
 
 /* Useful time constants */
 
@@ -73,9 +65,13 @@ bool filterUnwantedSounds = true;
 
 #define MAXIMUM_SAMPLES_IN_DMA_TRANSFER 768
 
-/* Compression constants */
+/* Compression constant */
 
 #define COMPRESSION_BUFFER_SIZE_IN_BYTES 512
+
+/* Temporary file buffer constant */
+
+#define TEMP_FILE_BUFFER_SIZE_IN_BYTES 512
 
 /* File size constants */
 
@@ -274,27 +270,7 @@ static wavHeader_t wavHeader = {
 
 /* Default configuration settings */
 
-static CP_configSettings_t defaultConfigSettings = {
-    .timezoneHours = 0,
-    .timezoneMinutes = 0,
-    .enableLED = 1,
-    .enableMagneticSwitch = 1,
-    .enableEdgeImpulseModel = 1,
-    .disableSleepRecordCycle = 1,
-    .enableTimeSettingFromGPS = 1,
-    .batteryLevelDisplayType = BATTERY_LEVEL,
-    .sleepDuration = 5,
-    .recordDuration = 55,
-    .minimumTriggerDuration = 0,
-    .activeStartStopPeriods = 1,
-    .startStopPeriods = {
-        {.startMinutes = 0, .stopMinutes = 1440},
-        {.startMinutes = 0, .stopMinutes = 1440},
-        {.startMinutes = 0, .stopMinutes = 1440},
-        {.startMinutes = 0, .stopMinutes = 1440},
-        {.startMinutes = 0, .stopMinutes = 1440}},
-    .earliestRecordingTime = 0,
-    .latestRecordingTime = 0};
+static CP_configSettings_t defaultConfigSettings;
 
 /* Functions to set WAV header details and comment */
 
@@ -483,7 +459,7 @@ static int16_t compressionBuffer[COMPRESSION_BUFFER_SIZE_IN_BYTES / NUMBER_OF_BY
 
 /* Temporary file buffer */
 
-static char *tempFileBuffer = (char *)&compressionBuffer;
+static char tempFileBuffer[TEMP_FILE_BUFFER_SIZE_IN_BYTES];
 
 /* GPS fix variables */
 
@@ -519,7 +495,7 @@ static int16_t secondaryBuffer[MAXIMUM_SAMPLES_IN_DMA_TRANSFER];
 
 static uint8_t firmwareVersion[AM_FIRMWARE_VERSION_LENGTH] = {1, 0, 0};
 
-static uint8_t firmwareDescription[AM_FIRMWARE_DESCRIPTION_LENGTH] = "AudioMoth-EdgeImpulse-RC1";
+static uint8_t firmwareDescription[AM_FIRMWARE_DESCRIPTION_LENGTH] = "AudioMoth-EdgeImpulse-RC5";
 
 /* Function prototypes */
 
@@ -777,38 +753,6 @@ static void calculateTimeToNextEvent(uint32_t currentTime, uint32_t currentMilli
     *timeUntilNextGPSTimeSetting = (int64_t)*timeOfNextGPSTimeSetting * MILLISECONDS_IN_SECOND - (int64_t)currentTime * MILLISECONDS_IN_SECOND - (int64_t)currentMilliseconds;
 }
 
-/* EI Project functions */
-
-static void logMsg(char *msg)
-{
-    AudioMoth_appendFile(LOGS_FILE);
-    AudioMoth_writeToFile(msg, strlen(msg));
-    AudioMoth_closeFile();
-}
-
-static void logFloat(float f)
-{
-    char str[100];
-    char *tmpSign = (f < 0) ? "-" : "";
-    float tmpVal = (f < 0) ? -f : f;
-
-    int tmpInt1 = tmpVal;                 // Get the integer.
-    float tmpFrac = tmpVal - tmpInt1;     // Get fraction.
-    int tmpInt2 = (int)(tmpFrac * 10000); // Turn into integer.
-
-    // Print as parts, note that you need 0-padding for fractional bit.
-
-    sprintf(str, "%s%d.%04d\n", tmpSign, tmpInt1, tmpInt2);
-
-    logMsg(str);
-}
-
-static void initialiseLogFile()
-{
-    AudioMoth_enableFileSystem(AM_SD_CARD_NORMAL_SPEED);
-    logMsg(STARTUP_MESSAGE);
-}
-
 /* Main function */
 
 int main(void)
@@ -919,33 +863,39 @@ int main(void)
 
                 AudioMoth_closeFile();
             }
-            else
-            {
+        }
 
-                writeStatusMessage("ERROR: Could not open configuration file.");
+        /* Show double warning flash if configuration was not successfully read from the SD card */
 
-                FLASH_LED(Both, LONG_LED_FLASH_DURATION);
+        if (configurationIsOkay == false)
+        {
 
-                AudioMoth_delay(SHORT_LED_FLASH_DURATION);
+            /* Write warning to file */
 
-                FLASH_LED(Both, LONG_LED_FLASH_DURATION);
+            writeStatusMessage("ERROR: Could not open configuration file.");
 
-                *previousSwitchPosition = AM_SWITCH_NONE;
+            /* Show show flash LED */
 
-                AudioMoth_powerDownAndWakeMilliseconds(DEFAULT_WAIT_INTERVAL);
-            }
+            FLASH_LED(Both, LONG_LED_FLASH_DURATION);
+
+            AudioMoth_delay(LONG_LED_FLASH_DURATION >> 1);
+
+            FLASH_LED(Both, LONG_LED_FLASH_DURATION);
+
+            /* Reset switch position so it will try to read again */
+
+            *previousSwitchPosition = AM_SWITCH_NONE;
+
+            AudioMoth_powerDownAndWakeMilliseconds(DEFAULT_WAIT_INTERVAL);
         }
 
         /* Check that conditions to make a recording have been satisfied */
 
-        *readyToMakeRecordings = configurationIsOkay && switchPosition == AM_SWITCH_DEFAULT;
-
-        *readyToMakeRecordings |= configurationIsOkay && switchPosition == AM_SWITCH_CUSTOM && (AudioMoth_hasTimeBeenSet() || configSettings->enableTimeSettingFromGPS);
+        *readyToMakeRecordings = switchPosition == AM_SWITCH_DEFAULT || (switchPosition == AM_SWITCH_CUSTOM && (AudioMoth_hasTimeBeenSet() || configSettings->enableTimeSettingFromGPS));
 
         /* Enable time setting from the GPS if it is not already set */
 
-        if (*readyToMakeRecordings)
-            *shouldSetTimeFromGPS = AudioMoth_hasTimeBeenSet() == false && configSettings->enableTimeSettingFromGPS;
+        *shouldSetTimeFromGPS = switchPosition == AM_SWITCH_CUSTOM && AudioMoth_hasTimeBeenSet() == false && configSettings->enableTimeSettingFromGPS;
 
         /* Calculate time of next recording if ready to make a recording */
 
@@ -967,22 +917,6 @@ int main(void)
             /* Try to write configuration to file */
 
             writtenDeviceDataToFileInThisSession = writeDeviceDataToFile(firmwareDescription, firmwareVersion, (uint8_t *)AM_UNIQUE_ID_START_ADDRESS);
-
-            /* Write the GPS log file */
-
-            if (configSettings->enableTimeSettingFromGPS)
-            {
-
-                bool success = AudioMoth_appendFile(GPS_FILENAME);
-
-                AudioMoth_getTime(&currentTime, &currentMilliseconds);
-
-                if (success)
-                    writeGPSLogMessage(currentTime, currentMilliseconds, "Switched to CUSTOM mode.\n");
-
-                if (success)
-                    AudioMoth_closeFile();
-            }
 
             /* Update the time and calculate earliest schedule start time */
 
@@ -1173,9 +1107,8 @@ int main(void)
 
             if (fileSystemEnabled)
             {
-                // makeProbArray(); // EI Debug Probability Array ANTHONY
+
                 recordingState = makeRecording(*timeOfNextRecording, *durationOfNextRecording, enableLED, extendedBatteryState, temperature, &fileOpenTime, &fileOpenMilliseconds);
-                // printProbArray();
             }
             else
             {
@@ -1546,7 +1479,7 @@ void GPS_handleFixEvent(uint32_t time, uint32_t milliseconds, GPS_fixTime_t *fix
 
     static char fixBuffer[128];
 
-    sprintf(fixBuffer, "Received GPS fix - %02d %02d.%04d %c %03d %02d.%04d %c at %02d/%02d/%04d %02d:%02d:%02d.%03d UTC.", fixPosition->latitudeDegrees, fixPosition->latitudeMinutes, fixPosition->latitudeTenThousandths, fixPosition->latitudeDirection, fixPosition->longitudeDegrees, fixPosition->longitudeMinutes, fixPosition->longitudeTenThousandths, fixPosition->longitudeDirection, fixTime->day, fixTime->month, fixTime->year, fixTime->hours, fixTime->minutes, fixTime->seconds, fixTime->milliseconds);
+    sprintf(fixBuffer, "Received GPS fix - %02d°%02d.%04d'%c %03d°%02d.%04d'%c at %02d/%02d/%04d %02d:%02d:%02d.%03d UTC.", fixPosition->latitudeDegrees, fixPosition->latitudeMinutes, fixPosition->latitudeTenThousandths, fixPosition->latitudeDirection, fixPosition->longitudeDegrees, fixPosition->longitudeMinutes, fixPosition->longitudeTenThousandths, fixPosition->longitudeDirection, fixTime->day, fixTime->month, fixTime->year, fixTime->hours, fixTime->minutes, fixTime->seconds, fixTime->milliseconds);
 
     writeGPSLogMessage(time, milliseconds, fixBuffer);
 
@@ -1755,7 +1688,7 @@ static AM_recordingState_t makeRecording(uint32_t timeOfNextRecording, uint32_t 
 
     /* Initialise microphone for recording */
 
-    AudioMoth_enableExternalSRAM(); // ANTHONY why do we need to initialize this again?
+    AudioMoth_enableExternalSRAM();
 
     bool externalMicrophone = AudioMoth_enableMicrophone(GAIN_RANGE, GAIN, CLOCK_DIVIDER, ACQUISITION_SAMPLES, OVER_SAMPLE_RATE);
 
@@ -2104,7 +2037,7 @@ static void scheduleRecording(uint32_t currentTime, uint32_t *timeOfNextRecordin
 
             *timeOfNextRecording = currentTime + startSeconds - currentSeconds;
 
-            if (configSettings->disableSleepRecordCycle)
+            if (configSettings->enableSleepRecordCycle == false)
             {
 
                 *durationOfNextRecording = durationOfStartStopPeriod;
@@ -2127,7 +2060,7 @@ static void scheduleRecording(uint32_t currentTime, uint32_t *timeOfNextRecordin
 
             uint32_t secondsFromStartOfPeriod = currentSeconds - startSeconds;
 
-            if (configSettings->disableSleepRecordCycle)
+            if (configSettings->enableSleepRecordCycle == false)
             {
 
                 *timeOfNextRecording = currentTime;
@@ -2182,7 +2115,7 @@ static void scheduleRecording(uint32_t currentTime, uint32_t *timeOfNextRecordin
 
     *timeOfNextRecording = currentTime + (SECONDS_IN_DAY - currentSeconds) + startSeconds;
 
-    if (configSettings->disableSleepRecordCycle)
+    if (configSettings->enableSleepRecordCycle == false)
     {
 
         *durationOfNextRecording = durationOfStartStopPeriod;
