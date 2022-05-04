@@ -48,6 +48,7 @@ Thumbs.db
 *.mov
 *.wmv
 
+# Build Files 
 firmware/build/audiomoth.axf
 firmware/build/audiomoth.bin
 firmware/build/audiomoth.hex
@@ -59,3 +60,7 @@ firmware/build/objects/ff.o
 firmware/build/objects/ffunicode.o
 firmware/build/objects/main.d
 firmware/build/objects/main.o
+
+# Edge Impulse Models 
+eimodel_storage/**
+eimodel_storage/*
