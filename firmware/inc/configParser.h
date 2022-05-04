@@ -31,7 +31,7 @@ typedef struct {
     uint8_t enableLED : 1;
     uint8_t enableMagneticSwitch : 1;
     uint8_t enableEdgeImpulseModel : 1;
-    uint8_t disableSleepRecordCycle : 1;
+    uint8_t enableSleepRecordCycle : 1;
     uint8_t enableTimeSettingFromGPS : 1;
     CP_batteryLevelDisplayType_t batteryLevelDisplayType : 2;
     uint16_t sleepDuration;
