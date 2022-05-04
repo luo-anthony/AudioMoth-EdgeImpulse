@@ -17,7 +17,7 @@
 #include "digitalFilter.h"
 
 /* EI Project includes and defines */
-#include "source/ei_main_loop.h"
+#include "ei_main_loop.h"
 #define DETECTION_THRESHOLD 0.8f
 #define EI_SIGNAL_LENGTH 16000
 #define LOGS_FILE "logs.txt"
@@ -1797,7 +1797,7 @@ static AM_recordingState_t makeRecording(uint32_t timeOfNextRecording, uint32_t 
             /* Perform EI Classification of the Buffer */
             AudioMoth_setGreenLED(true);
 
-                        float detection_probability = ei_classify(buffers[readBuffer], NUMBER_OF_SAMPLES_IN_BUFFER, EI_SIGNAL_LENGTH, (float *)EI_SRAM_START_ADDRESS);
+            float detection_probability = ei_classify(buffers[readBuffer], NUMBER_OF_SAMPLES_IN_BUFFER, EI_SIGNAL_LENGTH, (float *)EI_SRAM_START_ADDRESS);
             AudioMoth_setGreenLED(false);
             bool ei_keyword_detected = (detection_probability > DETECTION_THRESHOLD);
 
