@@ -1,5 +1,5 @@
 /* Edge Impulse inferencing library
- * Copyright (c) 2020 EdgeImpulse Inc.
+ * Copyright (c) 2021 EdgeImpulse Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -70,7 +70,7 @@ public:
             EIDSP_ERR(EIDSP_OUT_OF_MEM);
         }
 
-        if (filterbanks->rows != num_filter || filterbanks->cols != coefficients) {
+        if (filterbanks->rows != num_filter || filterbanks->cols != static_cast<uint32_t>(coefficients)) {
             EIDSP_ERR(EIDSP_MATRIX_SIZE_MISMATCH);
         }
 
@@ -111,7 +111,7 @@ public:
             // thus calculating the bucket to 64, not 65.
             // we're adjusting this here a tiny bit to ensure we have the same result
             if (ix == num_filter + 2 - 1) {
-                hertz[ix] -= 0.001f;
+                hertz[ix] -= 0.001;
             }
         }
         ei_dsp_free(mels, mels_mem_size);
@@ -192,14 +192,19 @@ public:
     static int mfe(matrix_t *out_features, matrix_t *out_energies,
         signal_t *signal,
         uint32_t sampling_frequency,
-        float frame_length = 0.02f, float frame_stride = 0.02f, uint16_t num_filters = 40,
-        uint16_t fft_length = 512, uint32_t low_frequency = 300, uint32_t high_frequency = 0
+        float frame_length, float frame_stride, uint16_t num_filters,
+        uint16_t fft_length, uint32_t low_frequency, uint32_t high_frequency,
+        uint16_t version
         )
     {
         int ret = 0;
 
         if (high_frequency == 0) {
             high_frequency = sampling_frequency / 2;
+        }
+
+        if (low_frequency == 0) {
+            low_frequency = 300;
         }
 
         stack_frames_info_t stack_frame_info = { 0 };
@@ -210,7 +215,8 @@ public:
             sampling_frequency,
             frame_length,
             frame_stride,
-            false
+            false,
+            version
         );
         if (ret != 0) {
             EIDSP_ERR(ret);
@@ -228,7 +234,7 @@ public:
             EIDSP_ERR(EIDSP_MATRIX_SIZE_MISMATCH);
         }
 
-        for(int i = 0; i < out_features->rows * out_features->cols; i++) {
+        for (uint32_t i = 0; i < out_features->rows * out_features->cols; i++) {
             *(out_features->buffer + i) = 0;
         }
 
@@ -292,7 +298,7 @@ public:
 
             float energy = numpy::sum(power_spectrum_frame.buffer, power_spectrum_frame_size);
             if (energy == 0) {
-                energy = FLT_EPSILON;
+                energy = 1e-10;
             }
 
             out_energies->buffer[ix] = energy;
@@ -317,6 +323,114 @@ public:
     }
 
     /**
+     * Compute spectrogram from a sensor signal.
+     * @param out_features Use `calculate_mfe_buffer_size` to allocate the right matrix.
+     * @param signal: audio signal structure with functions to retrieve data from a signal
+     * @param sampling_frequency (int): the sampling frequency of the signal
+     *     we are working with.
+     * @param frame_length (float): the length of each frame in seconds.
+     *     Default is 0.020s
+     * @param frame_stride (float): the step between successive frames in seconds.
+     *     Default is 0.02s (means no overlap)
+     * @param fft_length (int): number of FFT points. Default is 512.
+     * @EIDSP_OK if OK
+     */
+    static int spectrogram(matrix_t *out_features,
+        signal_t *signal, float sampling_frequency,
+        float frame_length, float frame_stride, uint16_t fft_length,
+        uint16_t version
+        )
+    {
+        int ret = 0;
+
+        stack_frames_info_t stack_frame_info = { 0 };
+        stack_frame_info.signal = signal;
+
+        ret = processing::stack_frames(
+            &stack_frame_info,
+            sampling_frequency,
+            frame_length,
+            frame_stride,
+            false,
+            version
+        );
+        if (ret != 0) {
+            EIDSP_ERR(ret);
+        }
+
+        if (stack_frame_info.frame_ixs->size() != out_features->rows) {
+            EIDSP_ERR(EIDSP_MATRIX_SIZE_MISMATCH);
+        }
+
+        uint16_t coefficients = fft_length / 2 + 1;
+
+        if (coefficients != out_features->cols) {
+            EIDSP_ERR(EIDSP_MATRIX_SIZE_MISMATCH);
+        }
+
+        for (uint32_t i = 0; i < out_features->rows * out_features->cols; i++) {
+            *(out_features->buffer + i) = 0;
+        }
+
+        for (size_t ix = 0; ix < stack_frame_info.frame_ixs->size(); ix++) {
+            // get signal data from the audio file
+            EI_DSP_MATRIX(signal_frame, 1, stack_frame_info.frame_length);
+
+            // don't read outside of the audio buffer... we'll automatically zero pad then
+            size_t signal_offset = stack_frame_info.frame_ixs->at(ix);
+            size_t signal_length = stack_frame_info.frame_length;
+            if (signal_offset + signal_length > stack_frame_info.signal->total_length) {
+                signal_length = signal_length -
+                    (stack_frame_info.signal->total_length - (signal_offset + signal_length));
+            }
+
+            ret = stack_frame_info.signal->get_data(
+                signal_offset,
+                signal_length,
+                signal_frame.buffer
+            );
+            if (ret != 0) {
+                EIDSP_ERR(ret);
+            }
+
+            // normalize data (only when version is above 3)
+            if (version >= 3) {
+                // it might be that everything is already normalized here...
+                bool all_between_min_1_and_1 = true;
+                for (size_t ix = 0; ix < signal_frame.rows * signal_frame.cols; ix++) {
+                    if (signal_frame.buffer[ix] < -1.0f || signal_frame.buffer[ix] > 1.0f) {
+                        all_between_min_1_and_1 = false;
+                        break;
+                    }
+                }
+
+                if (!all_between_min_1_and_1) {
+                    ret = numpy::scale(&signal_frame, 1.0f / 32768.0f);
+                    if (ret != 0) {
+                        EIDSP_ERR(ret);
+                    }
+                }
+            }
+
+            ret = processing::power_spectrum(
+                signal_frame.buffer,
+                stack_frame_info.frame_length,
+                out_features->buffer + (ix * coefficients),
+                coefficients,
+                fft_length
+            );
+
+            if (ret != 0) {
+                EIDSP_ERR(ret);
+            }
+        }
+
+        functions::zero_handling(out_features);
+
+        return EIDSP_OK;
+    }
+
+    /**
      * Calculate the buffer size for MFE
      * @param signal_length: Length of the signal.
      * @param sampling_frequency (int): The sampling frequency of the signal.
@@ -327,14 +441,16 @@ public:
     static matrix_size_t calculate_mfe_buffer_size(
         size_t signal_length,
         uint32_t sampling_frequency,
-        float frame_length = 0.02f, float frame_stride = 0.02f, uint16_t num_filters = 40)
+        float frame_length, float frame_stride, uint16_t num_filters,
+        uint16_t version)
     {
         uint16_t rows = processing::calculate_no_of_stack_frames(
             signal_length,
             sampling_frequency,
             frame_length,
             frame_stride,
-            false);
+            false,
+            version);
         uint16_t cols = num_filters;
 
         matrix_size_t size_matrix;
@@ -367,9 +483,10 @@ public:
      * @returns 0 if OK
      */
     static int mfcc(matrix_t *out_features, signal_t *signal,
-        uint32_t sampling_frequency, float frame_length = 0.02f, float frame_stride = 0.01f,
-        uint8_t num_cepstral = 13, uint16_t num_filters = 40, uint16_t fft_length = 512,
-        uint32_t low_frequency = 0, uint32_t high_frequency = 0, bool dc_elimination = true)
+        uint32_t sampling_frequency, float frame_length, float frame_stride,
+        uint8_t num_cepstral, uint16_t num_filters, uint16_t fft_length,
+        uint32_t low_frequency, uint32_t high_frequency, bool dc_elimination,
+        uint16_t version)
     {
         if (out_features->cols != num_cepstral) {
             EIDSP_ERR(EIDSP_MATRIX_SIZE_MISMATCH);
@@ -381,7 +498,8 @@ public:
                 sampling_frequency,
                 frame_length,
                 frame_stride,
-                num_filters);
+                num_filters,
+                version);
 
         if (out_features->rows != mfe_matrix_size.rows) {
             EIDSP_ERR(EIDSP_MATRIX_SIZE_MISMATCH);
@@ -402,7 +520,7 @@ public:
 
         ret = mfe(&features_matrix, &energy_matrix, signal,
             sampling_frequency, frame_length, frame_stride, num_filters, fft_length,
-            low_frequency, high_frequency);
+            low_frequency, high_frequency, version);
         if (ret != EIDSP_OK) {
             EIDSP_ERR(ret);
         }
@@ -448,14 +566,16 @@ public:
     static matrix_size_t calculate_mfcc_buffer_size(
         size_t signal_length,
         uint32_t sampling_frequency,
-        float frame_length = 0.02f, float frame_stride = 0.02f, uint16_t num_cepstral = 13)
+        float frame_length, float frame_stride, uint16_t num_cepstral,
+        uint16_t version)
     {
         uint16_t rows = processing::calculate_no_of_stack_frames(
             signal_length,
             sampling_frequency,
             frame_length,
             frame_stride,
-            false);
+            false,
+            version);
         uint16_t cols = num_cepstral;
 
         matrix_size_t size_matrix;

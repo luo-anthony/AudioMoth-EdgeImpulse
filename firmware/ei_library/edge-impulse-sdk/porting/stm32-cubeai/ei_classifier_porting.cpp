@@ -1,5 +1,5 @@
 /* Edge Impulse inferencing library
- * Copyright (c) 2020 EdgeImpulse Inc.
+ * Copyright (c) 2021 EdgeImpulse Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,9 +20,15 @@
  * SOFTWARE.
  */
 
+#include "../ei_classifier_porting.h"
+#if EI_PORTING_STM32_CUBEAI == 1
+
 #include "main.h"
-#include "edge-impulse-sdk/porting/ei_classifier_porting.h"
 #include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
 
 __attribute__((weak)) EI_IMPULSE_ERROR ei_run_impulse_check_canceled() {
     return EI_IMPULSE_OK;
@@ -49,9 +55,68 @@ __attribute__((weak)) void ei_printf(const char *format, ...) {
 }
 
 __attribute__((weak)) void ei_printf_float(float f) {
-    ei_printf("%f", f);
-}
+    float n = f;
 
-extern "C" __attribute__((weak)) void DebugLog(const char* s) {
+    static double PRECISION = 0.00001;
+    static int MAX_NUMBER_STRING_SIZE = 32;
+
+    char s[MAX_NUMBER_STRING_SIZE];
+
+    if (n == 0.0) {
+        strcpy(s, "0");
+    }
+    else {
+        int digit, m;
+        char *c = s;
+        int neg = (n < 0);
+        if (neg) {
+            n = -n;
+        }
+        // calculate magnitude
+        m = log10(n);
+        if (neg) {
+            *(c++) = '-';
+        }
+        if (m < 1.0) {
+            m = 0;
+        }
+        // convert the number
+        while (n > PRECISION || m >= 0) {
+            double weight = pow(10.0, m);
+            if (weight > 0 && !isinf(weight)) {
+                digit = floor(n / weight);
+                n -= (digit * weight);
+                *(c++) = '0' + digit;
+            }
+            if (m == 0 && n > 0) {
+                *(c++) = '.';
+            }
+            m--;
+        }
+        *(c) = '\0';
+    }
+
+
     ei_printf("%s", s);
 }
+
+__attribute__((weak)) void *ei_malloc(size_t size) {
+    return malloc(size);
+}
+
+__attribute__((weak)) void *ei_calloc(size_t nitems, size_t size) {
+    return calloc(nitems, size);
+}
+
+__attribute__((weak)) void ei_free(void *ptr) {
+    free(ptr);
+}
+
+#if defined(__cplusplus) && EI_C_LINKAGE == 1
+extern "C"
+#endif
+__attribute__((weak)) void DebugLog(const char* s) {
+    ei_printf("%s", s);
+}
+
+#endif // EI_PORTING_STM32_CUBEAI

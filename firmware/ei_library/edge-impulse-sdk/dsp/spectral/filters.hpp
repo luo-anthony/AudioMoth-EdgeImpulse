@@ -1,5 +1,5 @@
 /* Edge Impulse inferencing library
- * Copyright (c) 2020 EdgeImpulse Inc.
+ * Copyright (c) 2021 EdgeImpulse Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,7 @@
 #include "../numpy.hpp"
 
 #ifndef M_PI
-#define M_PI 3.14159265358979323846264338327950288f
+#define M_PI 3.14159265358979323846264338327950288
 #endif // M_PI
 
 namespace ei {
@@ -53,16 +53,16 @@ namespace filters {
         int n_steps = filter_order / 2;
         float a = tan(M_PI * cutoff_freq / sampling_freq);
         float a2 = pow(a, 2);
-        float *A = (float*)calloc(n_steps, sizeof(float));
-        float *d1 = (float*)calloc(n_steps, sizeof(float));
-        float *d2 = (float*)calloc(n_steps, sizeof(float));
-        float *w0 = (float*)calloc(n_steps, sizeof(float));
-        float *w1 = (float*)calloc(n_steps, sizeof(float));
-        float *w2 = (float*)calloc(n_steps, sizeof(float));
+        float *A = (float*)ei_calloc(n_steps, sizeof(float));
+        float *d1 = (float*)ei_calloc(n_steps, sizeof(float));
+        float *d2 = (float*)ei_calloc(n_steps, sizeof(float));
+        float *w0 = (float*)ei_calloc(n_steps, sizeof(float));
+        float *w1 = (float*)ei_calloc(n_steps, sizeof(float));
+        float *w2 = (float*)ei_calloc(n_steps, sizeof(float));
 
         // Calculate the filter parameters
         for(int ix = 0; ix < n_steps; ix++) {
-            float r = arm_sin_f32(M_PI * ((2.0 * ix) + 1.0) / (2.0 * filter_order));
+            float r = sin(M_PI * ((2.0 * ix) + 1.0) / (2.0 * filter_order));
             sampling_freq = a2 + (2.0 * a * r) + 1.0;
             A[ix] = a2 / sampling_freq;
             d1[ix] = 2.0 * (1 - a2) / sampling_freq;
@@ -81,12 +81,12 @@ namespace filters {
             }
         }
 
-        free(A);
-        free(d1);
-        free(d2);
-        free(w0);
-        free(w1);
-        free(w2);
+        ei_free(A);
+        ei_free(d1);
+        ei_free(d2);
+        ei_free(w0);
+        ei_free(w1);
+        ei_free(w2);
     }
 
     /**
@@ -109,12 +109,12 @@ namespace filters {
         int n_steps = filter_order / 2;
         float a = tan(M_PI * cutoff_freq / sampling_freq);
         float a2 = pow(a, 2);
-        float *A = (float*)calloc(n_steps, sizeof(float));
-        float *d1 = (float*)calloc(n_steps, sizeof(float));
-        float *d2 = (float*)calloc(n_steps, sizeof(float));
-        float *w0 = (float*)calloc(n_steps, sizeof(float));
-        float *w1 = (float*)calloc(n_steps, sizeof(float));
-        float *w2 = (float*)calloc(n_steps, sizeof(float));
+        float *A = (float*)ei_calloc(n_steps, sizeof(float));
+        float *d1 = (float*)ei_calloc(n_steps, sizeof(float));
+        float *d2 = (float*)ei_calloc(n_steps, sizeof(float));
+        float *w0 = (float*)ei_calloc(n_steps, sizeof(float));
+        float *w1 = (float*)ei_calloc(n_steps, sizeof(float));
+        float *w2 = (float*)ei_calloc(n_steps, sizeof(float));
 
         // Calculate the filter parameters
         for (int ix = 0; ix < n_steps; ix++) {
@@ -137,12 +137,12 @@ namespace filters {
             }
         }
 
-        free(A);
-        free(d1);
-        free(d2);
-        free(w0);
-        free(w1);
-        free(w2);
+        ei_free(A);
+        ei_free(d1);
+        ei_free(d2);
+        ei_free(w0);
+        ei_free(w1);
+        ei_free(w2);
     }
 
 } // namespace filters

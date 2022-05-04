@@ -1,5 +1,5 @@
 /* Edge Impulse inferencing library
- * Copyright (c) 2020 EdgeImpulse Inc.
+ * Copyright (c) 2021 EdgeImpulse Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -57,7 +57,7 @@ float calculate_cluster_distance(float *input, size_t input_size, const ei_class
 
     float dist = 0.0f;
     for (size_t ix = 0; ix < input_size; ix++) {
-        dist += pow(abs(input[ix] - cluster->centroid[ix]), 2);
+        dist += pow(input[ix] - cluster->centroid[ix], 2);
     }
     return sqrt(dist) - cluster->max_error;
 }

@@ -25,7 +25,7 @@ kiss_fftr_cfg kiss_fftr_alloc(int nfft,int inverse_fft,void * mem,size_t * lenme
     size_t subsize = 0, memneeded;
 
     if (nfft & 1) {
-        fprintf(stderr,"Real FFT optimization must be even.\n");
+        ei_printf("FFT length must be even\n");
         return NULL;
     }
     nfft >>= 1;
@@ -48,12 +48,18 @@ kiss_fftr_cfg kiss_fftr_alloc(int nfft,int inverse_fft,void * mem,size_t * lenme
     st->super_twiddles = st->tmpbuf + nfft;
     kiss_fft_alloc(nfft, inverse_fft, st->substate, &subsize);
 
-    for (i = 0; i < nfft/2; ++i) {
-        double phase =
-            -3.14159265358979323846264338327 * ((double) (i+1) / nfft + .5);
-        if (inverse_fft)
-            phase *= -1;
-        kf_cexp (st->super_twiddles+i,phase);
+    if (inverse_fft) {
+        for (i = 0; i < nfft/2; ++i) {
+            double phase =
+                3.14159265358979323846264338327 * ((double) (i+1) / nfft + .5);
+            kf_cexp (st->super_twiddles+i,phase);
+        }
+    } else  {
+        for (i = 0; i < nfft/2; ++i) {
+            double phase =
+                -3.14159265358979323846264338327 * ((double) (i+1) / nfft + .5);
+            kf_cexp (st->super_twiddles+i,phase);
+        }
     }
 
     if (memallocated != NULL) {
@@ -70,8 +76,7 @@ void kiss_fftr(kiss_fftr_cfg st,const kiss_fft_scalar *timedata,kiss_fft_cpx *fr
     kiss_fft_cpx fpnk,fpk,f1k,f2k,tw,tdc;
 
     if ( st->substate->inverse) {
-        fprintf(stderr,"kiss fft usage error: improper alloc\n");
-        exit(1);
+        ei_printf("kiss fft usage error: improper alloc\n");
     }
 
     ncfft = st->substate->nfft;
@@ -125,8 +130,7 @@ void kiss_fftri(kiss_fftr_cfg st,const kiss_fft_cpx *freqdata,kiss_fft_scalar *t
     int k, ncfft;
 
     if (st->substate->inverse == 0) {
-        fprintf (stderr, "kiss fft usage error: improper alloc\n");
-        exit (1);
+        ei_printf("kiss fft usage error: improper alloc\n");
     }
 
     ncfft = st->substate->nfft;

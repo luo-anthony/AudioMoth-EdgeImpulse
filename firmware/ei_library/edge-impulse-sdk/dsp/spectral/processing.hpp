@@ -1,5 +1,5 @@
 /* Edge Impulse inferencing library
- * Copyright (c) 2020 EdgeImpulse Inc.
+ * Copyright (c) 2021 EdgeImpulse Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,7 @@
 #include <algorithm>
 #include "../numpy.hpp"
 #include "filters.hpp"
+#include "fir_filter.hpp"
 
 namespace ei {
 namespace spectral {
@@ -75,6 +76,16 @@ namespace processing {
         float freq;
         float amplitude;
     } freq_peak_t;
+
+    typedef struct {
+        EIDSP_i16 freq;
+        EIDSP_i16 amplitude;
+    } freq_peak_i16_t;
+
+    typedef struct {
+        EIDSP_i32 freq;
+        EIDSP_i32 amplitude;
+    } freq_peak_i32_t;
 
     /**
      * Scale a the signal. This modifies the signal in place!
@@ -199,6 +210,7 @@ namespace processing {
             if (in[ix] > prev && in[ix] > in[ix+1]) {
                 // then make sure the threshold is met (on both?)
                 float height = (in[ix] - prev) + (in[ix] - in[ix + 1]);
+                // printf("%d inx: %f height: %f threshold: %f\r\n", ix, in[ix], height, threshold);
                 if (height > threshold) {
                     out[out_ix] = ix;
                     out_ix++;
@@ -208,12 +220,6 @@ namespace processing {
 
             prev = in[ix];
         }
-
-        // printf("find_peak_indexes returned: ");
-        // for (size_t ix = 0; ix < out_ix; ix++) {
-        //     printf("%d ", out[ix]);
-        // }
-        // printf("\n");
 
         *peaks_found = out_ix;
 
@@ -232,7 +238,8 @@ namespace processing {
         matrix_t *fft_matrix,
         matrix_t *output_matrix,
         float sampling_freq,
-        float threshold)
+        float threshold,
+        uint16_t fft_length)
     {
         if (fft_matrix->rows != 1) {
             EIDSP_ERR(EIDSP_MATRIX_SIZE_MISMATCH);
@@ -242,18 +249,22 @@ namespace processing {
             EIDSP_ERR(EIDSP_MATRIX_SIZE_MISMATCH);
         }
 
+        if (output_matrix->rows == 0) {
+            return EIDSP_OK;
+        }
+
         int ret;
 
-        int N = static_cast<int>(fft_matrix->cols);
+        int N = static_cast<int>(fft_length);
         float T = 1.0f / sampling_freq;
 
-        EI_DSP_MATRIX(freq_space, 1, N);
+        EI_DSP_MATRIX(freq_space, 1, fft_matrix->cols);
         ret = numpy::linspace(0.0f, 1.0f / (2.0f * T), floor(N / 2), freq_space.buffer);
         if (ret != EIDSP_OK) {
             EIDSP_ERR(ret);
         }
 
-        EI_DSP_MATRIX(peaks_matrix, output_matrix->rows * 4, 1);
+        EI_DSP_MATRIX(peaks_matrix, output_matrix->rows * 10, 1);
 
         uint16_t peak_count;
         ret = find_peak_indexes(fft_matrix, &peaks_matrix, 0.0f, &peak_count);
@@ -265,10 +276,10 @@ namespace processing {
         std::vector<freq_peak_t> peaks;
         for (uint8_t ix = 0; ix < peak_count; ix++) {
             freq_peak_t d;
-            // @todo: something somewhere does not go OK... and these numbers are dependent on
-            // the FFT length I think... But they are an OK approximation for now.
-            d.freq = freq_space.buffer[static_cast<uint32_t>(peaks_matrix.buffer[ix])] / 2.032258f;
-            d.amplitude = fft_matrix->buffer[static_cast<uint32_t>(peaks_matrix.buffer[ix])] / 1.969326f;
+
+            d.freq = freq_space.buffer[static_cast<uint32_t>(peaks_matrix.buffer[ix])];
+            d.amplitude = fft_matrix->buffer[static_cast<uint32_t>(peaks_matrix.buffer[ix])];
+            // printf("freq %f : %f amp: %f\r\n", peaks_matrix.buffer[ix], d.freq, d.amplitude);
             if (d.amplitude < threshold) {
                 d.freq = 0.0f;
                 d.amplitude = 0.0f;
@@ -297,6 +308,7 @@ namespace processing {
 
         return EIDSP_OK;
     }
+
 
     /**
      * Calculate spectral power edges in a singal
@@ -361,6 +373,7 @@ namespace processing {
         return EIDSP_OK;
     }
 
+
     /**
      * Estimate power spectral density using a periodogram using Welch's method.
      * @param input_matrix Of size 1xN
@@ -376,11 +389,11 @@ namespace processing {
             EIDSP_ERR(EIDSP_MATRIX_SIZE_MISMATCH);
         }
 
-        if (out_fft_matrix->rows != 1 || out_fft_matrix->cols != n_fft / 2 + 1) {
+        if (out_fft_matrix->rows != 1 || out_fft_matrix->cols != static_cast<uint32_t>(n_fft / 2 + 1)) {
             EIDSP_ERR(EIDSP_MATRIX_SIZE_MISMATCH);
         }
 
-        if (out_freq_matrix->rows != 1 || out_freq_matrix->cols != n_fft / 2 + 1) {
+        if (out_freq_matrix->rows != 1 || out_freq_matrix->cols != static_cast<uint32_t>(n_fft / 2 + 1)) {
             EIDSP_ERR(EIDSP_MATRIX_SIZE_MISMATCH);
         }
 
@@ -461,7 +474,6 @@ namespace processing {
 
         return EIDSP_OK;
     }
-
 } // namespace processing
 } // namespace spectral
 } // namespace ei

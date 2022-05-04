@@ -1,5 +1,5 @@
 /* Edge Impulse inferencing library
- * Copyright (c) 2020 EdgeImpulse Inc.
+ * Copyright (c) 2021 EdgeImpulse Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -134,11 +134,12 @@ public:
             }
 
             // multiply by 2/N
-            numpy::scale(&fft_matrix, (2.0f / static_cast<float>(fft_matrix.cols)));
+            numpy::scale(&fft_matrix, (2.0f / static_cast<float>(fft_length)));
 
             // we're now using the FFT matrix to calculate peaks etc.
             EI_DSP_MATRIX(peaks_matrix, fft_peaks, 2);
-            ret = spectral::processing::find_fft_peaks(&fft_matrix, &peaks_matrix, sampling_freq, fft_peaks_threshold);
+            ret = spectral::processing::find_fft_peaks(&fft_matrix, &peaks_matrix,
+                sampling_freq, fft_peaks_threshold, fft_length);
             if (ret != EIDSP_OK) {
                 EIDSP_ERR(EIDSP_MATRIX_SIZE_MISMATCH);
             }
@@ -179,6 +180,7 @@ public:
 
         return EIDSP_OK;
     }
+
 
     /**
      * Calculate the buffer size for Spectral Analysis

@@ -1,5 +1,5 @@
 /* Edge Impulse inferencing library
- * Copyright (c) 2020 EdgeImpulse Inc.
+ * Copyright (c) 2021 EdgeImpulse Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,7 @@ public:
      * @returns The mel scale values(or a single mel).
      */
     static float frequency_to_mel(float f) {
-        return 1127.0f * numpy::log(1 + f / 700.0f);
+        return 1127.0 * numpy::log(1 + f / 700.0f);
     }
 
     /**
@@ -62,7 +62,7 @@ public:
     static void zero_handling(float *input, size_t input_size) {
         for (size_t ix = 0; ix < input_size; ix++) {
             if (input[ix] == 0) {
-                input[ix] = FLT_EPSILON;
+                input[ix] = 1e-10;
             }
         }
     }
@@ -86,7 +86,7 @@ public:
      * @param middle
      * @param right
      */
-    static void triangle(float *x, size_t x_size, int left, int middle, int right) {
+    static int triangle(float *x, size_t x_size, int left, int middle, int right) {
         EI_DSP_MATRIX(out, 1, x_size);
 
         for (size_t ix = 0; ix < x_size; ix++) {
@@ -100,6 +100,8 @@ public:
         }
 
         memcpy(x, out.buffer, x_size * sizeof(float));
+
+        return EIDSP_OK;
     }
 };
 
