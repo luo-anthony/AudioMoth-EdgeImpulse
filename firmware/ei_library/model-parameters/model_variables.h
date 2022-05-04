@@ -25,11 +25,11 @@
 #include <stdint.h>
 #include "model_metadata.h"
 
-const char* ei_classifier_inferencing_categories[] = { "background", "coqui" };
+const char* ei_classifier_inferencing_categories[] = { "background", "duck" };
 
-uint8_t ei_dsp_config_13_axes[] = { 0 };
-const uint32_t ei_dsp_config_13_axes_size = 1;
-ei_dsp_config_mfcc_t ei_dsp_config_13 = {
+uint8_t ei_dsp_config_3_axes[] = { 0 };
+const uint32_t ei_dsp_config_3_axes_size = 1;
+ei_dsp_config_mfcc_t ei_dsp_config_3 = {
     3,
     1,
     13,
