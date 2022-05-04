@@ -26,7 +26,7 @@
 #include "edge-impulse-sdk/tensorflow/lite/c/builtin_op_data.h"
 #include "edge-impulse-sdk/tensorflow/lite/c/common.h"
 #include "edge-impulse-sdk/tensorflow/lite/micro/micro_mutable_op_resolver.h"
-#include "edge-impulse-sdk/porting_audiomoth/ei_classifier_porting.h"
+#include "edge-impulse-sdk/porting/ei_classifier_porting.h"
 
 #if EI_CLASSIFIER_PRINT_STATE
 #if defined(__cplusplus) && EI_C_LINKAGE == 1

@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
-#include "../../porting_audiomoth/ei_classifier_porting.h"
+#include "../../porting/ei_classifier_porting.h"
 
 #ifdef __cplusplus
 extern "C" {

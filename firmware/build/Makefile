@@ -15,10 +15,10 @@ TOOLCHAIN_VERSION = gcc-arm-none-eabi-10.3-2021.10
 TOOLPATH = $(TOOLCHAIN_PATH)/$(TOOLCHAIN_VERSION)/bin/
 
 # Edge Impulse Header files 
-EI_INC = ../ei_library ../ei_library/edge-impulse-sdk ../ei_library/edge-impulse-sdk/classifier ../ei_library/edge-impulse-sdk/third_party ../ei_library/edge-impulse-sdk/third_party/flatbuffers/include ../ei_library/edge-impulse-sdk/third_party/ruy ../ei_library/edge-impulse-sdk/CMSIS/NN/Include ../ei_library/edge-impulse-sdk/CMSIS/DSP/Include ../ei_library/edge-impulse-sdk/CMSIS/Core/Include ../ei_library/edge-impulse-sdk/DSP/PrivateInclude ../ei_library/edge-impulse-sdk/third_party/gemmlowp ../ei_library/edge-impulse-sdk/porting_audiomoth ../ei_library/tflite-model
+EI_INC = ../ei_library ../ei_library/edge-impulse-sdk ../ei_library/edge-impulse-sdk/classifier ../ei_library/edge-impulse-sdk/third_party ../ei_library/edge-impulse-sdk/third_party/flatbuffers/include ../ei_library/edge-impulse-sdk/third_party/ruy ../ei_library/edge-impulse-sdk/CMSIS/NN/Include ../ei_library/edge-impulse-sdk/CMSIS/DSP/Include ../ei_library/edge-impulse-sdk/CMSIS/Core/Include ../ei_library/edge-impulse-sdk/DSP/PrivateInclude ../ei_library/edge-impulse-sdk/third_party/gemmlowp ../ei_library/edge-impulse-sdk/porting ../ei_library/tflite-model
 
 # Edge Impulse and DSP Source Files
-EI_SRCS = ../DSP_Lib/Source/BasicMathFunctions ../DSP_Lib/Source/CommonTables ../DSP_Lib/Source/ComplexMathFunctions ../DSP_Lib/Source/ControllerFunctions ../DSP_Lib/Source/FastMathFunctions ../DSP_Lib/Source/FilteringFunctions ../DSP_Lib/Source/MatrixFunctions ../DSP_Lib/Source/StatisticsFunctions ../DSP_Lib/Source/SupportFunctions ../DSP_Lib/Source/TransformFunctions ../ei_library/edge-impulse-sdk/CMSIS/NN/Source/ActivationFunctions ../ei_library/edge-impulse-sdk/CMSIS/NN/Source/BasicMathFunctions ../ei_library/edge-impulse-sdk/CMSIS/NN/Source/ConcatenationFunctions ../ei_library/edge-impulse-sdk/CMSIS/NN/Source/ConvolutionFunctions ../ei_library/edge-impulse-sdk/CMSIS/NN/Source/FullyConnectedFunctions ../ei_library/edge-impulse-sdk/CMSIS/NN/Source/NNSupportFunctions ../ei_library/edge-impulse-sdk/CMSIS/NN/Source/PoolingFunctions ../ei_library/edge-impulse-sdk/CMSIS/NN/Source/ReshapeFunctions ../ei_library/edge-impulse-sdk/CMSIS/NN/Source/SoftmaxFunctions ../ei_library/edge-impulse-sdk/dsp ../ei_library/edge-impulse-sdk/dsp/dct ../ei_library/edge-impulse-sdk/dsp/kissfft ../ei_library/edge-impulse-sdk/porting_audiomoth ../ei_library/edge-impulse-sdk/tensorflow/lite/c ../ei_library/edge-impulse-sdk/tensorflow/lite/core/api ../ei_library/edge-impulse-sdk/tensorflow/lite/kernels ../ei_library/edge-impulse-sdk/tensorflow/lite/kernels/internal ../ei_library/edge-impulse-sdk/tensorflow/lite/micro ../ei_library/edge-impulse-sdk/tensorflow/lite/micro/kernels ../ei_library/edge-impulse-sdk/tensorflow/lite/micro/memory_planner ../ei_library/edge-impulse-sdk/tensorflow/lite/micro/testing ../ei_library/source ../ei_library/tflite-model
+EI_SRCS = ../DSP_Lib/Source/BasicMathFunctions ../DSP_Lib/Source/CommonTables ../DSP_Lib/Source/ComplexMathFunctions ../DSP_Lib/Source/ControllerFunctions ../DSP_Lib/Source/FastMathFunctions ../DSP_Lib/Source/FilteringFunctions ../DSP_Lib/Source/MatrixFunctions ../DSP_Lib/Source/StatisticsFunctions ../DSP_Lib/Source/SupportFunctions ../DSP_Lib/Source/TransformFunctions ../ei_library/edge-impulse-sdk/CMSIS/NN/Source/ActivationFunctions ../ei_library/edge-impulse-sdk/CMSIS/NN/Source/BasicMathFunctions ../ei_library/edge-impulse-sdk/CMSIS/NN/Source/ConcatenationFunctions ../ei_library/edge-impulse-sdk/CMSIS/NN/Source/ConvolutionFunctions ../ei_library/edge-impulse-sdk/CMSIS/NN/Source/FullyConnectedFunctions ../ei_library/edge-impulse-sdk/CMSIS/NN/Source/NNSupportFunctions ../ei_library/edge-impulse-sdk/CMSIS/NN/Source/PoolingFunctions ../ei_library/edge-impulse-sdk/CMSIS/NN/Source/ReshapeFunctions ../ei_library/edge-impulse-sdk/CMSIS/NN/Source/SoftmaxFunctions ../ei_library/edge-impulse-sdk/dsp ../ei_library/edge-impulse-sdk/dsp/dct ../ei_library/edge-impulse-sdk/dsp/kissfft ../ei_library/edge-impulse-sdk/porting/audiomoth ../ei_library/edge-impulse-sdk/tensorflow/lite/c ../ei_library/edge-impulse-sdk/tensorflow/lite/core/api ../ei_library/edge-impulse-sdk/tensorflow/lite/kernels ../ei_library/edge-impulse-sdk/tensorflow/lite/kernels/internal ../ei_library/edge-impulse-sdk/tensorflow/lite/micro ../ei_library/edge-impulse-sdk/tensorflow/lite/micro/kernels ../ei_library/edge-impulse-sdk/tensorflow/lite/micro/memory_planner ../ei_library/edge-impulse-sdk/tensorflow/lite/micro/testing ../ei_library/source ../ei_library/tflite-model
 
 # Source files for this project (C and C++)
 SRC = ../device/src ../emlib/src ../emusb/src ../drivers/src ../fatfs/src ../gps/src ../src ../cmsis $(EI_SRCS)
@@ -55,6 +55,12 @@ _OBJ = $(_CSRC:.c=.o) $(_CPPSRC:.cpp=.o) $(_CPPSRC2:.cc=.o) $(_SSRC:.s=.o) $(_SS
 OBJ = $(sort $(foreach d, $(_OBJ), $(OBJPATH)$d))
 
 DEP = $(OBJ:.o=.d)
+
+# Optional Compiler Macros 
+
+COMPILER_MACROS = TIMINGINSTRUMENT
+
+MACROFLAGS = $(foreach d, $(COMPILER_MACROS), -D$d)
 
 # These are the compilation settings
 

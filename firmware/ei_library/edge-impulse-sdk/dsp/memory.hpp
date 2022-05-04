@@ -26,7 +26,7 @@
 // clang-format off
 #include <stdio.h>
 #include <memory>
-#include "../porting_audiomoth/ei_classifier_porting.h"
+#include "../porting/ei_classifier_porting.h"
 #include "edge-impulse-sdk/classifier/ei_aligned_malloc.h"
 
 extern size_t ei_memory_in_use;

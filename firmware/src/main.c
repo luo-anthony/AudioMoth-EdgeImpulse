@@ -1795,9 +1795,9 @@ static AM_recordingState_t makeRecording(uint32_t timeOfNextRecording, uint32_t 
             uint32_t numberOfSamplesToWrite = MIN(numberOfSamples + numberOfSamplesInHeader - samplesWritten, NUMBER_OF_SAMPLES_IN_BUFFER);
 
             /* Perform EI Classification of the Buffer */
-            // ANTHONY
             AudioMoth_setGreenLED(true);
-            float detection_probability = ei_classify(buffers[readBuffer], NUMBER_OF_SAMPLES_IN_BUFFER, EI_SIGNAL_LENGTH, (float *)EI_SRAM_START_ADDRESS);
+
+                        float detection_probability = ei_classify(buffers[readBuffer], NUMBER_OF_SAMPLES_IN_BUFFER, EI_SIGNAL_LENGTH, (float *)EI_SRAM_START_ADDRESS);
             AudioMoth_setGreenLED(false);
             bool ei_keyword_detected = (detection_probability > DETECTION_THRESHOLD);
 

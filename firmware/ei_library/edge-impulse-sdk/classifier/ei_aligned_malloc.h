@@ -24,7 +24,7 @@
 #define _EDGE_IMPULSE_ALIGNED_MALLOC_H_
 
 #include <assert.h>
-#include "../porting_audiomoth/ei_classifier_porting.h"
+#include "../porting/ei_classifier_porting.h"
 
 #ifdef __cplusplus
 namespace

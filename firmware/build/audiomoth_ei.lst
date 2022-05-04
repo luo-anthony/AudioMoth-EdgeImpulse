@@ -16551,32 +16551,32 @@ Disassembly of section .text:
     dbda:	4b1a      	ldr	r3, [pc, #104]	; (dc44 <_ZN12_GLOBAL__N_1L22inference_tflite_setupEPyPP12TfLiteTensorS3_RSt10unique_ptrIvPFvPvEE.constprop.0+0xf0>)
     dbdc:	4a1a      	ldr	r2, [pc, #104]	; (dc48 <_ZN12_GLOBAL__N_1L22inference_tflite_setupEPyPP12TfLiteTensorS3_RSt10unique_ptrIvPFvPvEE.constprop.0+0xf4>)
     dbde:	481b      	ldr	r0, [pc, #108]	; (dc4c <_ZN12_GLOBAL__N_1L22inference_tflite_setupEPyPP12TfLiteTensorS3_RSt10unique_ptrIvPFvPvEE.constprop.0+0xf8>)
-    dbe0:	f240 21aa 	movw	r1, #682	; 0x2aa
+    dbe0:	f240 21fd 	movw	r1, #765	; 0x2fd
     dbe4:	f019 ff56 	bl	27a94 <__assert_func>
     dbe8:	4b19      	ldr	r3, [pc, #100]	; (dc50 <_ZN12_GLOBAL__N_1L22inference_tflite_setupEPyPP12TfLiteTensorS3_RSt10unique_ptrIvPFvPvEE.constprop.0+0xfc>)
     dbea:	4a17      	ldr	r2, [pc, #92]	; (dc48 <_ZN12_GLOBAL__N_1L22inference_tflite_setupEPyPP12TfLiteTensorS3_RSt10unique_ptrIvPFvPvEE.constprop.0+0xf4>)
     dbec:	4817      	ldr	r0, [pc, #92]	; (dc4c <_ZN12_GLOBAL__N_1L22inference_tflite_setupEPyPP12TfLiteTensorS3_RSt10unique_ptrIvPFvPvEE.constprop.0+0xf8>)
-    dbee:	f240 21ab 	movw	r1, #683	; 0x2ab
+    dbee:	f240 21fe 	movw	r1, #766	; 0x2fe
     dbf2:	f019 ff4f 	bl	27a94 <__assert_func>
     dbf6:	4b17      	ldr	r3, [pc, #92]	; (dc54 <_ZN12_GLOBAL__N_1L22inference_tflite_setupEPyPP12TfLiteTensorS3_RSt10unique_ptrIvPFvPvEE.constprop.0+0x100>)
     dbf8:	4a13      	ldr	r2, [pc, #76]	; (dc48 <_ZN12_GLOBAL__N_1L22inference_tflite_setupEPyPP12TfLiteTensorS3_RSt10unique_ptrIvPFvPvEE.constprop.0+0xf4>)
     dbfa:	4814      	ldr	r0, [pc, #80]	; (dc4c <_ZN12_GLOBAL__N_1L22inference_tflite_setupEPyPP12TfLiteTensorS3_RSt10unique_ptrIvPFvPvEE.constprop.0+0xf8>)
-    dbfc:	f240 21b2 	movw	r1, #690	; 0x2b2
+    dbfc:	f240 3106 	movw	r1, #774	; 0x306
     dc00:	f019 ff48 	bl	27a94 <__assert_func>
     dc04:	4b14      	ldr	r3, [pc, #80]	; (dc58 <_ZN12_GLOBAL__N_1L22inference_tflite_setupEPyPP12TfLiteTensorS3_RSt10unique_ptrIvPFvPvEE.constprop.0+0x104>)
     dc06:	4a10      	ldr	r2, [pc, #64]	; (dc48 <_ZN12_GLOBAL__N_1L22inference_tflite_setupEPyPP12TfLiteTensorS3_RSt10unique_ptrIvPFvPvEE.constprop.0+0xf4>)
     dc08:	4810      	ldr	r0, [pc, #64]	; (dc4c <_ZN12_GLOBAL__N_1L22inference_tflite_setupEPyPP12TfLiteTensorS3_RSt10unique_ptrIvPFvPvEE.constprop.0+0xf8>)
-    dc0a:	f240 21b3 	movw	r1, #691	; 0x2b3
+    dc0a:	f240 3107 	movw	r1, #775	; 0x307
     dc0e:	f019 ff41 	bl	27a94 <__assert_func>
     dc12:	4b12      	ldr	r3, [pc, #72]	; (dc5c <_ZN12_GLOBAL__N_1L22inference_tflite_setupEPyPP12TfLiteTensorS3_RSt10unique_ptrIvPFvPvEE.constprop.0+0x108>)
     dc14:	4a0c      	ldr	r2, [pc, #48]	; (dc48 <_ZN12_GLOBAL__N_1L22inference_tflite_setupEPyPP12TfLiteTensorS3_RSt10unique_ptrIvPFvPvEE.constprop.0+0xf4>)
     dc16:	480d      	ldr	r0, [pc, #52]	; (dc4c <_ZN12_GLOBAL__N_1L22inference_tflite_setupEPyPP12TfLiteTensorS3_RSt10unique_ptrIvPFvPvEE.constprop.0+0xf8>)
-    dc18:	f240 21b6 	movw	r1, #694	; 0x2b6
+    dc18:	f240 310b 	movw	r1, #779	; 0x30b
     dc1c:	f019 ff3a 	bl	27a94 <__assert_func>
     dc20:	4b0f      	ldr	r3, [pc, #60]	; (dc60 <_ZN12_GLOBAL__N_1L22inference_tflite_setupEPyPP12TfLiteTensorS3_RSt10unique_ptrIvPFvPvEE.constprop.0+0x10c>)
     dc22:	4a09      	ldr	r2, [pc, #36]	; (dc48 <_ZN12_GLOBAL__N_1L22inference_tflite_setupEPyPP12TfLiteTensorS3_RSt10unique_ptrIvPFvPvEE.constprop.0+0xf4>)
     dc24:	4809      	ldr	r0, [pc, #36]	; (dc4c <_ZN12_GLOBAL__N_1L22inference_tflite_setupEPyPP12TfLiteTensorS3_RSt10unique_ptrIvPFvPvEE.constprop.0+0xf8>)
-    dc26:	f240 21b7 	movw	r1, #695	; 0x2b7
+    dc26:	f44f 7143 	mov.w	r1, #780	; 0x30c
     dc2a:	f019 ff33 	bl	27a94 <__assert_func>
     dc2e:	bf00      	nop
     dc30:	0000da9d 	.word	0x0000da9d

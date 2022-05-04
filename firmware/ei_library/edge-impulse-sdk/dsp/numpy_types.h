@@ -35,7 +35,7 @@
 #endif // __cplusplus
 #include "config.hpp"
 
-#include "../porting_audiomoth/ei_classifier_porting.h"
+#include "../porting/ei_classifier_porting.h"
 
 #if EIDSP_TRACK_ALLOCATIONS
 #include "memory.hpp"
