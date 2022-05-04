@@ -38,7 +38,7 @@
 #if defined(EI_CLASSIFIER_HAS_SAMPLER) && EI_CLASSIFIER_HAS_SAMPLER == 1
 #include "ei_sampler.h"
 #endif
-#include "edge-impulse-sdk/porting/ei_classifier_porting.h"
+#include "edge-impulse-sdk/porting_audiomoth/ei_classifier_porting.h"
 #include "model-parameters/dsp_blocks.h"
 #include "ei_performance_calibration.h"
 

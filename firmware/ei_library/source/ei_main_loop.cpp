@@ -27,15 +27,15 @@ extern "C" void makeProbArray()
 // Print probability array for log file
 extern "C" void printProbArray()
 {
-    ei_printf_force("[");
-    for (size_t ix = 0; ix < prob_index; ix++)
-    {
-        ei_printf_force_float(prob_array[ix]);
+    // ei_printf_force("[");
+    // for (size_t ix = 0; ix < prob_index; ix++)
+    // {
+    //     ei_printf_force_float(prob_array[ix]);
 
-        if (ix != prob_index - 1)
-            ei_printf_force(", ");
-    }
-    ei_printf_force("]\n");
+    //     if (ix != prob_index - 1)
+    //         ei_printf_force(", ");
+    // }
+    // ei_printf_force("]\n");
 }
 
 // Return pointer to probability array
