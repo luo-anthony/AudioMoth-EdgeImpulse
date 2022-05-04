@@ -16,7 +16,7 @@ TOOLPATH = $(TOOLCHAIN_PATH)/$(TOOLCHAIN_VERSION)/bin/
 
 # Path to Edge Impulse Model to use 
 
-EI_MODELPATH = /Users/anthonyluo/Desktop/NatGeoResearch/AudioMoth-EdgeImpulse/eimodel_storage/coqui-model-v5
+EI_MODELPATH = /Users/anthonyluo/Desktop/NatGeoResearch/NewEdgeImpulseModels/Duck
 
 # Set the name of the output files
 
