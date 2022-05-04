@@ -14,20 +14,26 @@ TOOLCHAIN_VERSION = gcc-arm-none-eabi-10.3-2021.10
 
 TOOLPATH = $(TOOLCHAIN_PATH)/$(TOOLCHAIN_VERSION)/bin/
 
-# Edge Impulse Header files 
-EI_INC = ../edgeimpulse ../edgeimpulse/edge-impulse-sdk ../edgeimpulse/edge-impulse-sdk/classifier ../edgeimpulse/edge-impulse-sdk/third_party ../edgeimpulse/edge-impulse-sdk/third_party/flatbuffers/include ../edgeimpulse/edge-impulse-sdk/third_party/ruy ../edgeimpulse/edge-impulse-sdk/CMSIS/NN/Include ../edgeimpulse/edge-impulse-sdk/CMSIS/DSP/Include ../edgeimpulse/edge-impulse-sdk/CMSIS/Core/Include ../edgeimpulse/edge-impulse-sdk/DSP/PrivateInclude ../edgeimpulse/edge-impulse-sdk/third_party/gemmlowp ../edgeimpulse/edge-impulse-sdk/porting ../edgeimpulse/tflite-model ../edgeimpulse/inc
+# Path to Edge Impulse Model to use 
 
-# Edge Impulse and DSP Source Files
-EI_SRCS = ../dsplib/Source/BasicMathFunctions ../dsplib/Source/CommonTables ../dsplib/Source/ComplexMathFunctions ../dsplib/Source/ControllerFunctions ../dsplib/Source/FastMathFunctions ../dsplib/Source/FilteringFunctions ../dsplib/Source/MatrixFunctions ../dsplib/Source/StatisticsFunctions ../dsplib/Source/SupportFunctions ../dsplib/Source/TransformFunctions ../edgeimpulse/edge-impulse-sdk/CMSIS/NN/Source/ActivationFunctions ../edgeimpulse/edge-impulse-sdk/CMSIS/NN/Source/BasicMathFunctions ../edgeimpulse/edge-impulse-sdk/CMSIS/NN/Source/ConcatenationFunctions ../edgeimpulse/edge-impulse-sdk/CMSIS/NN/Source/ConvolutionFunctions ../edgeimpulse/edge-impulse-sdk/CMSIS/NN/Source/FullyConnectedFunctions ../edgeimpulse/edge-impulse-sdk/CMSIS/NN/Source/NNSupportFunctions ../edgeimpulse/edge-impulse-sdk/CMSIS/NN/Source/PoolingFunctions ../edgeimpulse/edge-impulse-sdk/CMSIS/NN/Source/ReshapeFunctions ../edgeimpulse/edge-impulse-sdk/CMSIS/NN/Source/SoftmaxFunctions ../edgeimpulse/edge-impulse-sdk/dsp ../edgeimpulse/edge-impulse-sdk/dsp/dct ../edgeimpulse/edge-impulse-sdk/dsp/kissfft ../edgeimpulse/edge-impulse-sdk/tensorflow/lite/c ../edgeimpulse/edge-impulse-sdk/tensorflow/lite/core/api ../edgeimpulse/edge-impulse-sdk/tensorflow/lite/kernels ../edgeimpulse/edge-impulse-sdk/tensorflow/lite/kernels/internal ../edgeimpulse/edge-impulse-sdk/tensorflow/lite/micro ../edgeimpulse/edge-impulse-sdk/tensorflow/lite/micro/kernels ../edgeimpulse/edge-impulse-sdk/tensorflow/lite/micro/memory_planner ../edgeimpulse/edge-impulse-sdk/tensorflow/lite/micro/testing ../edgeimpulse/src ../edgeimpulse/tflite-model
-
-# Source files for this project (C and C++)
-SRC = ../device/src ../emlib/src ../emusb/src ../drivers/src ../fatfs/src ../gps/src ../src ../cmsis $(EI_SRCS)
-
-# Header files for this project (C and C++)
-INC = ../cmsis ../device/inc ../emlib/inc ../emusb/inc ../drivers/inc ../fatfs/inc ../gps/inc ../inc $(EI_INC)
+EI_MODELPATH = /Users/anthonyluo/Desktop/NatGeoResearch/AudioMoth-EdgeImpulse/eimodel_storage/coqui-model-v5
 
 # Set the name of the output files
+
 FILENAME = audiomoth_edgeimpulse
+
+# Edge Impulse Header Files 
+
+EI_INC = $(EI_MODELPATH) $(EI_MODELPATH)/edge-impulse-sdk $(EI_MODELPATH)/edge-impulse-sdk/classifier $(EI_MODELPATH)/edge-impulse-sdk/third_party $(EI_MODELPATH)/edge-impulse-sdk/third_party/flatbuffers/include $(EI_MODELPATH)/edge-impulse-sdk/third_party/ruy $(EI_MODELPATH)/edge-impulse-sdk/CMSIS/NN/Include $(EI_MODELPATH)/edge-impulse-sdk/CMSIS/DSP/Include $(EI_MODELPATH)/edge-impulse-sdk/CMSIS/Core/Include $(EI_MODELPATH)/edge-impulse-sdk/DSP/PrivateInclude $(EI_MODELPATH)/edge-impulse-sdk/third_party/gemmlowp $(EI_MODELPATH)/edge-impulse-sdk/porting $(EI_MODELPATH)/tflite-model
+
+# Edge Impulse Source Files
+EI_SRCS = $(EI_MODELPATH)/edge-impulse-sdk/CMSIS/NN/Source/ActivationFunctions $(EI_MODELPATH)/edge-impulse-sdk/CMSIS/NN/Source/BasicMathFunctions $(EI_MODELPATH)/edge-impulse-sdk/CMSIS/NN/Source/ConcatenationFunctions $(EI_MODELPATH)/edge-impulse-sdk/CMSIS/NN/Source/ConvolutionFunctions $(EI_MODELPATH)/edge-impulse-sdk/CMSIS/NN/Source/FullyConnectedFunctions $(EI_MODELPATH)/edge-impulse-sdk/CMSIS/NN/Source/NNSupportFunctions $(EI_MODELPATH)/edge-impulse-sdk/CMSIS/NN/Source/PoolingFunctions $(EI_MODELPATH)/edge-impulse-sdk/CMSIS/NN/Source/ReshapeFunctions $(EI_MODELPATH)/edge-impulse-sdk/CMSIS/NN/Source/SoftmaxFunctions $(EI_MODELPATH)/edge-impulse-sdk/dsp $(EI_MODELPATH)/edge-impulse-sdk/dsp/dct $(EI_MODELPATH)/edge-impulse-sdk/dsp/kissfft $(EI_MODELPATH)/edge-impulse-sdk/tensorflow/lite/c $(EI_MODELPATH)/edge-impulse-sdk/tensorflow/lite/core/api $(EI_MODELPATH)/edge-impulse-sdk/tensorflow/lite/kernels $(EI_MODELPATH)/edge-impulse-sdk/tensorflow/lite/kernels/internal $(EI_MODELPATH)/edge-impulse-sdk/tensorflow/lite/micro $(EI_MODELPATH)/edge-impulse-sdk/tensorflow/lite/micro/kernels $(EI_MODELPATH)/edge-impulse-sdk/tensorflow/lite/micro/memory_planner $(EI_MODELPATH)/edge-impulse-sdk/tensorflow/lite/micro/testing $(EI_MODELPATH)/tflite-model
+
+# Source files for this project (C and C++)
+SRC = ../device/src ../emlib/src ../emusb/src ../drivers/src ../fatfs/src ../gps/src ../src ../cmsis ../edgeimpulse/src ../dsplib/Source/BasicMathFunctions ../dsplib/Source/CommonTables ../dsplib/Source/ComplexMathFunctions ../dsplib/Source/ControllerFunctions ../dsplib/Source/FastMathFunctions ../dsplib/Source/FilteringFunctions ../dsplib/Source/MatrixFunctions ../dsplib/Source/StatisticsFunctions ../dsplib/Source/SupportFunctions ../dsplib/Source/TransformFunctions $(EI_SRCS)
+
+# Header files for this project (C and C++)
+INC = ../cmsis ../device/inc ../emlib/inc ../emusb/inc ../drivers/inc ../fatfs/inc ../gps/inc ../inc ../edgeimpulse/inc $(EI_INC)
 
 # This is the location of the resulting object files
 OBJPATH = ./objects/
