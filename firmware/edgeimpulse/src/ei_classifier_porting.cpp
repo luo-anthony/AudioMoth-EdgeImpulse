@@ -26,6 +26,8 @@
 // #include "audioMoth.h"
 #include "ei_classifier_porting.h"
 
+void ei_printf_force_float(float);
+
 __attribute__((weak)) EI_IMPULSE_ERROR ei_run_impulse_check_canceled()
 {
     return EI_IMPULSE_OK;

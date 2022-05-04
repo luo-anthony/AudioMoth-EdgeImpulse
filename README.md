@@ -10,6 +10,12 @@ This firmware is based off of [SmartMoth](https://github.com/leocorne/AudioMoth-
 
 ## Steps to Change Edge Impulse Models ##
 
-1. Train a different neural network (using MFCC for audio) on the Edge Impulse platform. Go to the "Deployment" tab, build the C++ library, and download the ZIP file (and unzip it)
-2. Replace the `model-parameters` folder in `firmware/ei_library/` with the `model-parameters` folder from the Edge Impulse ZIP folder generated. 
-3. Replace the `tflite-model` folder in `firmware/ei_library/` with the `tflite-model` folder from the Edge Impulse ZIP folder generated.
+Train a different neural network (using MFCC for audio) on the Edge Impulse platform. Go to the "Deployment" tab, build the C++ library, and download the ZIP file (and unzip it). 
+
+
+Replace the following **folders** in `firmware/edgeimpulse/` with the folders (and all files within the folders) from the Edge Impulse ZIP folder generated
+
+- `model-parameters`
+- `tflite-model`
+- `edge-impulse-sdk`
+
