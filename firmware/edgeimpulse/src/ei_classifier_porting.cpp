@@ -50,19 +50,16 @@ uint64_t ei_read_timer_ms()
     uint16_t ms;
 
     // AudioMoth_getTime(&s, &ms);
-
     // return (uint64_t) ((s * 1000) + ms);
     return 0;
 }
 
 uint64_t ei_read_timer_us()
 {
-    // TODO: find out if we can actually get microseconds
     uint32_t s;
     uint16_t ms;
 
     // AudioMoth_getTime(&s, &ms);
-
     // return ((uint64_t)(s * 1000000)) + ((uint64_t)(ms * 1000));
     return 0; // temporarily comment out to get it to compile
 }

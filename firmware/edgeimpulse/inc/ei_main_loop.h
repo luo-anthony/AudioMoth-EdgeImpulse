@@ -7,10 +7,6 @@ extern "C"
 
     float ei_classify(int16_t *raw_features, int signal_size);
 
-    void makeProbArray();
-    void printProbArray();
-    float *getProbArray();
-
 #ifdef __cplusplus
 }
 #endif

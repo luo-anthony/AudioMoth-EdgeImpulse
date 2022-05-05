@@ -1,75 +1,45 @@
-// #include <stdio.h>
-// #include <iostream>
-// #include <sstream>
 #include <string>
 #include "ei_run_classifier.h"
 #include "ei_classifier_porting.h"
 #include "audioMoth.h"
 
-// Depending on how the EI model was trained, the "interesting word" might be at index 0 or 1
-// We keep track of this with this variable
+/* NOTE: Depending on how the EI model was trained, the "interesting word" might be at index 0 or 1
+We keep track of this with this variable */
+
 #define INTERESTING_SOUND_INDEX 1
-
-// This must be a constant as we can't instantiate an array with variable size.
-// TODO: Find a way to make this variable so it can work with any recording length.
-// Alternative: make this very long and ignore the last values if not needed (but wastes space)
-#define RECORDING_LENGTH_IN_BUFFERS 10
-
-float prob_array[RECORDING_LENGTH_IN_BUFFERS];
-int prob_index;
-
-// Create probability array for log file
-extern "C" void makeProbArray()
-{
-    prob_index = 0;
-}
-
-// Print probability array for log file
-extern "C" void printProbArray()
-{
-    // ei_printf_force("[");
-    // for (size_t ix = 0; ix < prob_index; ix++)
-    // {
-    //     ei_printf_force_float(prob_array[ix]);
-
-    //     if (ix != prob_index - 1)
-    //         ei_printf_force(", ");
-    // }
-    // ei_printf_force("]\n");
-}
-
-// Return pointer to probability array
-extern "C" float *getProbArray()
-{
-    return prob_array;
-}
 
 static int16_t *audio_sample;
 
-// Callback function declaration
+/* Callback function declaration */
+
 static int get_signal_data(size_t offset, size_t length, float *out_ptr);
 
-// Main function to classify audio signal using new callback function
+/* Main function to classify audio signal using new callback function */
+
 extern "C" float ei_classify(int16_t *raw_features, int signal_size)
 {
 
     audio_sample = raw_features;
 
     ei_impulse_result_t result;
+
     signal_t signal;
 
     signal.total_length = signal_size;
+
     signal.get_data = &get_signal_data;
 
     EI_IMPULSE_ERROR res = run_classifier(&signal, &result, false);
 
-    // Finally return the probability of having spotted the wanted sound to the AudioMoth system
+    /* Finally return the probability of having spotted the wanted sound to the AudioMoth system */ 
 
     float detection_prob = result.classification[INTERESTING_SOUND_INDEX].value;
+
     return detection_prob;
 }
 
-// Callback: fill a section of the out_ptr buffer when requested
+/* Callback: fill a section of the out_ptr buffer when requested */
+
 static int get_signal_data(size_t offset, size_t length, float *out_ptr)
 {
     for (size_t i = 0; i < length; i++)
