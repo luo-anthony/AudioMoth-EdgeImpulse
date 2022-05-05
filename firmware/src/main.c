@@ -1794,18 +1794,18 @@ static AM_recordingState_t makeRecording(uint32_t timeOfNextRecording, uint32_t 
 
             uint32_t numberOfSamplesToWrite = MIN(numberOfSamples + numberOfSamplesInHeader - samplesWritten, NUMBER_OF_SAMPLES_IN_BUFFER);
 
-            // TEMPORARY TIMING CODE
-            uint32_t startClassifyTime, dummy, stopClassifyTime;
-            AudioMoth_getTime(&dummy, &startClassifyTime);
+            // // TEMPORARY TIMING CODE
+            // uint32_t startClassifyTime, dummy, stopClassifyTime;
+            // AudioMoth_getTime(&dummy, &startClassifyTime);
 
             /* Perform EI Classification of the Buffer */
             AudioMoth_setGreenLED(true);
-            float detection_probability = ei_classify(buffers[readBuffer], NUMBER_OF_SAMPLES_IN_BUFFER, EI_SIGNAL_LENGTH, (float *)EI_SRAM_START_ADDRESS);
+            float detection_probability = ei_classify(buffers[readBuffer], EI_SIGNAL_LENGTH);
             AudioMoth_setGreenLED(false);
             bool ei_keyword_detected = (detection_probability > DETECTION_THRESHOLD);
 
-            // TEMPORARY TIMING CODE
-            AudioMoth_getTime(&dummy, &stopClassifyTime);
+            // // TEMPORARY TIMING CODE
+            // AudioMoth_getTime(&dummy, &stopClassifyTime);
 
             /* Check if this buffer should actually be written to the SD card */
 
@@ -1886,11 +1886,11 @@ static AM_recordingState_t makeRecording(uint32_t timeOfNextRecording, uint32_t 
 
             buffersProcessed += 1;
 
-            // TEMPORARY TIMING CODE
-            uint32_t length = sprintf(tempFileBuffer, "\nCLASSIFICATION TIME: %lu ms", stopClassifyTime - startClassifyTime);
-            AudioMoth_appendFile("LOGS.txt");
-            AudioMoth_writeToFile(tempFileBuffer, length);
-            AudioMoth_closeFile();
+            // // TEMPORARY TIMING CODE
+            // uint32_t length = sprintf(tempFileBuffer, "\nCLASSIFICATION TIME: %lu ms", stopClassifyTime - startClassifyTime);
+            // AudioMoth_appendFile("LOGS.txt");
+            // AudioMoth_writeToFile(tempFileBuffer, length);
+            // AudioMoth_closeFile();
         }
 
         /* Check the voltage level */
