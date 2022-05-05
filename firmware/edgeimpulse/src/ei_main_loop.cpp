@@ -44,33 +44,38 @@ extern "C" float *getProbArray()
     return prob_array;
 }
 
-// Main function to classify audio signal
-extern "C" float ei_classify(int16_t *raw_features, int raw_features_size, int signal_size, float *signal_start_address)
+static int16_t *audio_sample;
+
+// Callback function declaration
+static int get_signal_data(size_t offset, size_t length, float *out_ptr);
+
+// Main function to classify audio signal using new callback function
+extern "C" float ei_classify(int16_t *raw_features, int signal_size)
 {
 
-    // Convert raw inputs to float as this is what the Edge Impulse model takes in.
-
-    float *float_features = signal_start_address;
-
-    for (int i = 0; i < signal_size; ++i)
-    {
-        float_features[i] = (float)raw_features[i];
-    }
+    audio_sample = raw_features;
 
     ei_impulse_result_t result;
     signal_t signal;
 
-    numpy::signal_from_buffer(&float_features[0], signal_size, &signal);
+    signal.total_length = signal_size;
+    signal.get_data = &get_signal_data;
 
     EI_IMPULSE_ERROR res = run_classifier(&signal, &result, false);
 
     // Finally return the probability of having spotted the wanted sound to the AudioMoth system
 
     float detection_prob = result.classification[INTERESTING_SOUND_INDEX].value;
-
-    prob_index++;
-    prob_index %= RECORDING_LENGTH_IN_BUFFERS;
-
-    prob_array[prob_index] = detection_prob;
     return detection_prob;
+}
+
+// Callback: fill a section of the out_ptr buffer when requested
+static int get_signal_data(size_t offset, size_t length, float *out_ptr)
+{
+    for (size_t i = 0; i < length; i++)
+    {
+        out_ptr[i] = (float)(audio_sample + offset)[i];
+    }
+
+    return EIDSP_OK;
 }
