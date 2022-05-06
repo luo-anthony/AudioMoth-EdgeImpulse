@@ -15,11 +15,6 @@
 #include "audioMoth.h"
 #include "configParser.h"
 #include "digitalFilter.h"
-#include "ei_main_loop.h"
-
-/* Edge Impulse Definitions */
-#define DETECTION_THRESHOLD                     0.8f
-#define EI_SIGNAL_LENGTH                        16000
 
 /* Useful time constants */
 
@@ -51,13 +46,12 @@
 #define SHORT_WAIT_INTERVAL                     100
 #define DEFAULT_WAIT_INTERVAL                   1000
 
-/* SRAM buffer constants*/
+/* SRAM buffer constants */
 
 #define NUMBER_OF_BUFFERS                       8
 #define NUMBER_OF_BYTES_IN_SAMPLE               2
-
-#define NUMBER_OF_SAMPLES_IN_DMA_TRANSFER       1024
-#define NUMBER_OF_SAMPLES_IN_BUFFER             (16 * 1024)
+#define EXTERNAL_SRAM_SIZE_IN_SAMPLES           (AM_EXTERNAL_SRAM_SIZE_IN_BYTES / NUMBER_OF_BYTES_IN_SAMPLE)
+#define NUMBER_OF_SAMPLES_IN_BUFFER             (EXTERNAL_SRAM_SIZE_IN_SAMPLES / NUMBER_OF_BUFFERS)
 
 /* DMA transfer constant */
 
@@ -1716,19 +1710,9 @@ static AM_recordingState_t makeRecording(uint32_t timeOfNextRecording, uint32_t 
 
             uint32_t numberOfSamplesToWrite = MIN(numberOfSamples + numberOfSamplesInHeader - samplesWritten, NUMBER_OF_SAMPLES_IN_BUFFER);
 
-            /* Perform Edge Impulse Model Classification of the Buffer */
-
-            AudioMoth_setGreenLED(true);
-
-            float detection_probability = ei_classify(buffers[readBuffer], EI_SIGNAL_LENGTH);
-
-            AudioMoth_setGreenLED(false);
-
-            bool ei_keyword_detected = (detection_probability > DETECTION_THRESHOLD);
-
             /* Check if this buffer should actually be written to the SD card */
 
-            bool writeIndicated = configSettings->enableEdgeImpulseModel == false || ei_keyword_detected;
+            bool writeIndicated = configSettings->enableEdgeImpulseModel == false || readBuffer % 2 == 1;
 
             /* Ensure the minimum number of buffers will be written */
 
